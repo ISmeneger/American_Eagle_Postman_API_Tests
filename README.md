@@ -6,6 +6,24 @@
 
 An **independent educational QA portfolio project** testing selected American Eagle REST API endpoints using Postman and JavaScript assertions. This project is not affiliated with or endorsed by American Eagle Outfitters. It exercises a guest shopping-bag workflow and API validation behavior; no real purchases are made.
 
+## Technical stack
+
+- **Postman** — API requests, collections, variables and Collection Runner.
+- **JavaScript** — automated assertions and pre-request scripts.
+- **REST API / JSON** — HTTP requests, response validation and data handling.
+- **OAuth 2.0 / Bearer Token** — guest authentication and authorized API requests.
+- **Postman Vault** — local storage of sensitive authentication credentials.
+- **Git / GitHub** — version control and project documentation.
+
+## Key features
+
+- **End-to-end API testing:** complete guest shopping-bag workflow, from authentication to empty-cart verification.
+- **Positive and negative scenarios:** successful operations, authorization errors, invalid SKU, missing headers and invalid quantity.
+- **Automatic token refresh:** collection-level pre-request script obtains a new guest token when required.
+- **Dynamic variables:** reuse of tokens, cart IDs and item IDs across requests.
+- **Automated assertions:** 124 checks across 18 API requests in the verified local run.
+- **Secure credential handling:** sensitive Basic credentials are stored in Postman Vault rather than the exported collection.
+
 ## Verified results
 
 On **October 19, 2026**, the final, sanitized collection was executed **in one local Postman Collection Runner run** (one iteration):
