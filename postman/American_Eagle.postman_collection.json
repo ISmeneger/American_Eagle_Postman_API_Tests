@@ -1,0 +1,1505 @@
+{
+  "info": {
+    "_postman_id": "d3395dad-3828-4872-bfbb-20eee611302d",
+    "name": "American Eagle | Postman API Testing — Final",
+    "description": "Educational, unofficial Postman API testing portfolio for American Eagle. Uses local Postman Vault secret ae_basic_auth for OAuth Basic authentication. No credentials or runtime tokens are included. Not affiliated with American Eagle.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "31668707",
+    "_collection_link": "https://go.postman.co/collection/31668707-d3395dad-3828-4872-bfbb-20eee611302d?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Negative Tests",
+      "item": [
+        {
+          "name": "Bag without Authorization",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Status code is 401 Unauthorized\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\nif (pm.response.code === 401) {\r\n    const response = pm.response.json();\r\n\r\n    pm.test(\"Response contains error object\", function () {\r\n        pm.expect(response.error).to.be.an(\"object\");\r\n    });\r\n\r\n    pm.test(\"Error status is 401\", function () {\r\n        pm.expect(response.error.status).to.eql(\"401\");\r\n    });\r\n\r\n    pm.test(\"Error details array is not empty\", function () {\r\n        pm.expect(response.error.errors)\r\n            .to.be.an(\"array\")\r\n            .that.is.not.empty;\r\n    });\r\n\r\n    pm.test(\"Error key indicates invalid token\", function () {\r\n        const errorKeys = response.error.errors.map(\r\n            error => error.key\r\n        );\r\n\r\n        pm.expect(errorKeys)\r\n            .to.include(\"apicg.token.invalid\");\r\n    });\r\n\r\n    pm.test(\"Response contains no cart data\", function () {\r\n        pm.expect(response.data)\r\n            .to.be.an(\"object\")\r\n            .that.is.empty;\r\n    });\r\n\r\n    console.log(\"Unauthorized request rejected as expected\");\r\n    console.log(\"HTTP status:\", pm.response.code);\r\n}\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://www.ae.com/ugp-api/bag/v1?couponErrorBehavior=cart&inventoryCheck=true",
+              "protocol": "https",
+              "host": [
+                "www",
+                "ae",
+                "com"
+              ],
+              "path": [
+                "ugp-api",
+                "bag",
+                "v1"
+              ],
+              "query": [
+                {
+                  "key": "couponErrorBehavior",
+                  "value": "cart"
+                },
+                {
+                  "key": "inventoryCheck",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Bag with Invalid Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Status code is 401 Unauthorized\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\nif (pm.response.code === 401) {\r\n    const response = pm.response.json();\r\n\r\n    pm.test(\"Response contains error object\", function () {\r\n        pm.expect(response.error).to.be.an(\"object\");\r\n    });\r\n\r\n    pm.test(\"Error status is 401\", function () {\r\n        pm.expect(response.error.status).to.eql(\"401\");\r\n    });\r\n\r\n    pm.test(\"Error details are present\", function () {\r\n        pm.expect(response.error.errors)\r\n            .to.be.an(\"array\")\r\n            .that.is.not.empty;\r\n    });\r\n\r\n    pm.test(\"Invalid token error is returned\", function () {\r\n        const errorKeys = response.error.errors.map(\r\n            error => error.key\r\n        );\r\n\r\n        pm.expect(errorKeys)\r\n            .to.include(\"apicg.token.invalid\");\r\n    });\r\n\r\n    pm.test(\"Cart data is not returned\", function () {\r\n        pm.expect(response.data)\r\n            .to.be.an(\"object\")\r\n            .that.is.empty;\r\n    });\r\n\r\n    console.log(\"Invalid Bearer Token rejected as expected\");\r\n}\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "invalid-test-token",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://www.ae.com/ugp-api/bag/v1?couponErrorBehavior=cart&inventoryCheck=true",
+              "protocol": "https",
+              "host": [
+                "www",
+                "ae",
+                "com"
+              ],
+              "path": [
+                "ugp-api",
+                "bag",
+                "v1"
+              ],
+              "query": [
+                {
+                  "key": "couponErrorBehavior",
+                  "value": "cart"
+                },
+                {
+                  "key": "inventoryCheck",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Item with Invalid SKU",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Status code is 422\", function () {\r\n    pm.response.to.have.status(422);\r\n});\r\n\r\nif (pm.response.code === 422) {\r\n    const response = pm.response.json();\r\n\r\n    pm.test(\"Response contains cartId\", function () {\r\n        pm.expect(response.cartId)\r\n            .to.be.a(\"string\")\r\n            .and.not.empty;\r\n    });\r\n\r\n    pm.test(\"Response contains errors array\", function () {\r\n        pm.expect(response.errors)\r\n            .to.be.an(\"array\")\r\n            .that.is.not.empty;\r\n    });\r\n\r\n    const errors = response.errors || [];\r\n\r\n    pm.test(\"Error refers to skuId\", function () {\r\n        const hasSkuError = errors.some(\r\n            error =>\r\n                Array.isArray(error.fields) &&\r\n                error.fields.includes(\"skuId\")\r\n        );\r\n\r\n        pm.expect(hasSkuError).to.eql(true);\r\n    });\r\n\r\n    pm.test(\"Error key is correct\", function () {\r\n        const errorKeys = errors.map(\r\n            error => error.key\r\n        );\r\n\r\n        pm.expect(errorKeys)\r\n            .to.include(\"error.cart.general\");\r\n    });\r\n\r\n    pm.test(\"Error message indicates invalid SKU\", function () {\r\n        const messages = errors.map(\r\n            error => error.message\r\n        );\r\n\r\n        pm.expect(messages)\r\n            .to.include(\"SKU is Invalid\");\r\n    });\r\n\r\n    pm.test(\"Error contains submitted SKU\", function () {\r\n        const errorArgs = errors.flatMap(\r\n            error => error.args || []\r\n        );\r\n\r\n        pm.expect(errorArgs.join(\" \"))\r\n            .to.include(\"INVALID_SKU_TEST\");\r\n    });\r\n\r\n    console.log(\"Invalid SKU rejected as expected\");\r\n    console.log(\"HTTP status:\", pm.response.code);\r\n}\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "aesite",
+                "value": "AEO_US"
+              },
+              {
+                "key": "aelang",
+                "value": "en_US"
+              },
+              {
+                "key": "aecountry",
+                "value": "US"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"items\": [\r\n    {\r\n      \"skuId\": \"INVALID_SKU_TEST\",\r\n      \"quantity\": 1\r\n    }\r\n  ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://www.ae.com/ugp-api/bag/v1/items",
+              "protocol": "https",
+              "host": [
+                "www",
+                "ae",
+                "com"
+              ],
+              "path": [
+                "ugp-api",
+                "bag",
+                "v1",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify invalid SKU not added",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nif (pm.response.code === 200) {\r\n    const response = pm.response.json();\r\n    const cart = response.data;\r\n\r\n    pm.test(\"Response contains cart data\", function () {\r\n        pm.expect(cart).to.be.an(\"object\");\r\n        pm.expect(cart.items).to.be.an(\"array\");\r\n    });\r\n\r\n    pm.test(\"Invalid SKU is absent from cart\", function () {\r\n        const invalidItem = cart.items.find(\r\n            item => String(item.sku) === \"INVALID_SKU_TEST\"\r\n        );\r\n\r\n        pm.expect(invalidItem).to.be.undefined;\r\n    });\r\n\r\n    pm.test(\"Cart is empty\", function () {\r\n        pm.expect(cart.items).to.be.an(\"array\").that.is.empty;\r\n    });\r\n\r\n    pm.test(\"Cart itemCount equals zero\", function () {\r\n        pm.expect(cart.itemCount).to.eql(0);\r\n    });\r\n\r\n    pm.test(\"Response has no errors\", function () {\r\n        pm.expect(response.errors || [])\r\n            .to.be.an(\"array\")\r\n            .that.is.empty;\r\n    });\r\n\r\n    console.log(\"Invalid SKU was not added to cart\");\r\n}\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "aesite",
+                "value": "AEO_US"
+              },
+              {
+                "key": "aelang",
+                "value": "en_US"
+              },
+              {
+                "key": "aecountry",
+                "value": "US"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "https://www.ae.com/ugp-api/bag/v1?couponErrorBehavior=cart&inventoryCheck=true",
+              "protocol": "https",
+              "host": [
+                "www",
+                "ae",
+                "com"
+              ],
+              "path": [
+                "ugp-api",
+                "bag",
+                "v1"
+              ],
+              "query": [
+                {
+                  "key": "couponErrorBehavior",
+                  "value": "cart"
+                },
+                {
+                  "key": "inventoryCheck",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Item without aeSite Header",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Status code is 400 Bad Request\", function () {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"Response is valid JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\nconst response = pm.response.json();\r\n\r\npm.test(\"Error name indicates missing header\", function () {\r\n    pm.expect(response.errorName)\r\n        .to.eql(\"MissingRequestHeaderException\");\r\n});\r\n\r\npm.test(\"Response contains errors array\", function () {\r\n    pm.expect(response.errors)\r\n        .to.be.an(\"array\")\r\n        .that.is.not.empty;\r\n});\r\n\r\npm.test(\"Error refers to aeSite header\", function () {\r\n    const hasAeSiteError = response.errors.some(\r\n        error =>\r\n            Array.isArray(error.fields) &&\r\n            error.fields.includes(\"aeSite\")\r\n    );\r\n\r\n    pm.expect(hasAeSiteError).to.eql(true);\r\n});\r\n\r\npm.test(\"Error key is correct\", function () {\r\n    const errorKeys = response.errors.map(\r\n        error => error.key\r\n    );\r\n\r\n    pm.expect(errorKeys)\r\n        .to.include(\"error.cart.aeSite.required\");\r\n});\r\n\r\npm.test(\"Error message describes missing header\", function () {\r\n    const messages = response.errors.map(\r\n        error => error.message || \"\"\r\n    );\r\n\r\n    pm.expect(\r\n        messages.some(message =>\r\n            message.includes(\"aeSite\") &&\r\n            message.includes(\"not present\")\r\n        )\r\n    ).to.eql(true);\r\n});\r\n\r\npm.test(\"Error status is 400\", function () {\r\n    pm.expect(response.status).to.eql(400);\r\n});\r\n\r\nconsole.log(\"Missing aeSite header rejected as expected\");\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "aesite",
+                "value": "AEO_US",
+                "disabled": true
+              },
+              {
+                "key": "aelang",
+                "value": "en_US"
+              },
+              {
+                "key": "aecountry",
+                "value": "US"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"items\": [\r\n    {\r\n      \"skuId\": \"{{skuId}}\",\r\n      \"quantity\": 1\r\n    }\r\n  ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://www.ae.com/ugp-api/bag/v1/items",
+              "protocol": "https",
+              "host": [
+                "www",
+                "ae",
+                "com"
+              ],
+              "path": [
+                "ugp-api",
+                "bag",
+                "v1",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Item with Invalid Quantity",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Status code is 400 Bad Request\", function () {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"Response is valid JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n\r\nconst response = pm.response.json();\r\n\r\npm.test(\"Error name indicates invalid argument\", function () {\r\n    pm.expect(response.errorName)\r\n        .to.eql(\"MethodArgumentNotValidException\");\r\n});\r\n\r\npm.test(\"Response contains errors array\", function () {\r\n    pm.expect(response.errors)\r\n        .to.be.an(\"array\")\r\n        .that.is.not.empty;\r\n});\r\n\r\nconst errors = response.errors;\r\n\r\npm.test(\"Error refers to item quantity\", function () {\r\n    const quantityError = errors.find(\r\n        error =>\r\n            Array.isArray(error.fields) &&\r\n            error.fields.includes(\"items[0].quantity\")\r\n    );\r\n\r\n    pm.expect(quantityError).to.exist;\r\n});\r\n\r\npm.test(\"Error key indicates invalid quantity\", function () {\r\n    const errorKeys = errors.map(error => error.key);\r\n\r\n    pm.expect(errorKeys)\r\n        .to.include(\"error.cart.item_qty_invalid\");\r\n});\r\n\r\npm.test(\"Error contains invalid quantity value\", function () {\r\n    const errorArgs = errors.flatMap(\r\n        error => error.args || []\r\n    );\r\n\r\n    pm.expect(errorArgs).to.include(0);\r\n});\r\n\r\npm.test(\"Error status is 400\", function () {\r\n    pm.expect(response.status).to.eql(400);\r\n});\r\n\r\npm.test(\"Response contains timestamp\", function () {\r\n    pm.expect(response.timestamp)\r\n        .to.be.a(\"string\")\r\n        .and.not.empty;\r\n});\r\n\r\nconsole.log(\"Invalid quantity rejected as expected\");\r\nconsole.log(\"HTTP status:\", pm.response.code);\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "aesite",
+                "value": "AEO_US"
+              },
+              {
+                "key": "aelang",
+                "value": "en_US"
+              },
+              {
+                "key": "aecountry",
+                "value": "US"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"items\": [\r\n    {\r\n      \"skuId\": \"{{skuId}}\",\r\n      \"quantity\": 0\r\n    }\r\n  ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://www.ae.com/ugp-api/bag/v1/items",
+              "protocol": "https",
+              "host": [
+                "www",
+                "ae",
+                "com"
+              ],
+              "path": [
+                "ugp-api",
+                "bag",
+                "v1",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Positive E2E",
+      "item": [
+        {
+          "name": "Get Guest Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\n/**\r\n * Get Guest Token — After response\r\n * Проверка OAuth-ответа и сохранение Guest Token.\r\n */\r\n\r\n// 1. Проверяем HTTP-статус\r\npm.test(\"Guest Token: status code 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\n// 2. Проверяем Content-Type\r\npm.test(\"Response Content-Type is JSON\", function () {\r\n    pm.expect(\r\n        pm.response.headers.get(\"Content-Type\")\r\n    ).to.include(\"json\");\r\n});\r\n\r\n// 3. Обрабатываем успешный ответ\r\nif (pm.response.code === 200) {\r\n\r\n    const response = pm.response.json();\r\n\r\n    pm.test(\"Access token is present\", function () {\r\n        pm.expect(response.access_token)\r\n            .to.be.a(\"string\")\r\n            .and.not.empty;\r\n    });\r\n\r\n    pm.test(\"Token expiration is valid\", function () {\r\n        const expiresIn = Number(response.expires_in ?? 1800);\r\n\r\n        pm.expect(expiresIn)\r\n            .to.be.a(\"number\")\r\n            .and.greaterThan(60);\r\n    });\r\n\r\n    // 4. Сохраняем Guest Token\r\n    if (\r\n        typeof response.access_token === \"string\" &&\r\n        response.access_token.length > 0\r\n    ) {\r\n        const expiresIn = Number(response.expires_in ?? 1800);\r\n\r\n        if (Number.isFinite(expiresIn) && expiresIn > 60) {\r\n\r\n            const expiresAt =\r\n                Date.now() + (expiresIn - 60) * 1000;\r\n\r\n            pm.collectionVariables.set(\r\n                \"token\",\r\n                response.access_token\r\n            );\r\n\r\n            pm.collectionVariables.set(\r\n                \"token_expires_at\",\r\n                String(expiresAt)\r\n            );\r\n\r\n            console.log(\"Guest Token saved successfully\");\r\n            console.log(\"Token expires in:\", expiresIn, \"seconds\");\r\n\r\n        } else {\r\n            console.error(\"Invalid token expiration time\");\r\n        }\r\n    }\r\n\r\n} else {\r\n    console.error(\r\n        \"Failed to get Guest Token. HTTP status:\",\r\n        pm.response.code\r\n    );\r\n}\r\n"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\n/**\r\n * Get Guest Token — Before request\r\n * Получение Basic Authentication из Postman Vault.\r\n */\r\n\r\nconst basicAuth = await pm.vault.get(\"ae_basic_auth\");\r\n\r\n// Проверяем наличие и формат Basic Authorization\r\nif (\r\n    typeof basicAuth !== \"string\" ||\r\n    !/^Basic\\s+[A-Za-z0-9+/=]+$/.test(basicAuth.trim())\r\n) {\r\n    throw new Error(\r\n        \"Basic Authentication credentials are missing or invalid in Postman Vault\"\r\n    );\r\n}\r\n\r\n// Устанавливаем актуальный заголовок Authorization\r\npm.request.headers.upsert({\r\n    key: \"Authorization\",\r\n    value: basicAuth.trim()\r\n});\r\n\r\nconsole.log(\"OAuth Basic Authorization configured\");\r\n"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disabledSystemHeaders": {
+              "accept": true
+            }
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/vnd.oracle.resource+json"
+              },
+              {
+                "key": "aelang",
+                "value": "en_US"
+              },
+              {
+                "key": "aesite",
+                "value": "AEO_US"
+              },
+              {
+                "key": "content-type",
+                "value": "application/x-www-form-urlencoded; charset=UTF-8"
+              },
+              {
+                "key": "origin",
+                "value": "https://www.ae.com"
+              },
+              {
+                "key": "referer",
+                "value": "https://www.ae.com/us/en"
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "grant_type",
+                  "value": "client_credentials"
+                }
+              ]
+            },
+            "url": {
+              "raw": "https://www.ae.com/ugp-api/auth/oauth/v5/token",
+              "protocol": "https",
+              "host": [
+                "www",
+                "ae",
+                "com"
+              ],
+              "path": [
+                "ugp-api",
+                "auth",
+                "oauth",
+                "v5",
+                "token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add item to bag",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Status code is 202\", function () {\r\n    pm.response.to.have.status(202);\r\n});\r\n\r\nif (pm.response.code === 202) {\r\n    const response = pm.response.json();\r\n\r\n    pm.test(\"Cart ID is present\", function () {\r\n        pm.expect(response.cartId).to.be.a(\"string\").and.not.empty;\r\n    });\r\n\r\n    pm.test(\"Errors is an array\", function () {\r\n        pm.expect(response.errors).to.be.an(\"array\");\r\n    });\r\n\r\n    if (response.cartId) {\r\n        pm.collectionVariables.set(\"cartId\", response.cartId);\r\n        console.log(\"Saved cartId:\", response.cartId);\r\n    }\r\n\r\n    // Подставляем значения переменных в Body\r\n    const resolvedBody = pm.variables.replaceIn(pm.request.body.raw);\r\n    const requestBody = JSON.parse(resolvedBody);\r\n\r\n    const skuId = requestBody.items[0].skuId;\r\n    const quantity = requestBody.items[0].quantity;\r\n\r\n    pm.collectionVariables.set(\"skuId\", skuId);\r\n\r\n    console.log(\"Saved skuId:\", skuId);\r\n    console.log(\"Requested quantity:\", quantity);\r\n}\r\n"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const resolvedBody = pm.variables.replaceIn(pm.request.body.raw);\r\nconst requestData = JSON.parse(resolvedBody);\r\n\r\nconsole.log(\"Request SKU:\", requestData.items[0].skuId);\r\nconsole.log(\"Request quantity:\", requestData.items[0].quantity);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "aecountry",
+                "value": "US"
+              },
+              {
+                "key": "aelang",
+                "value": "en_US"
+              },
+              {
+                "key": "aesite",
+                "value": "AEO_US"
+              },
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "origin",
+                "value": "https://www.ae.com"
+              },
+              {
+                "key": "referer",
+                "value": "https://www.ae.com/us/en/c/men/mens?pagetype=clp"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"items\": [\r\n    {\r\n      \"skuId\": \"{{skuId}}\",\r\n      \"quantity\": {{quantity}}\r\n    }\r\n  ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://www.ae.com/ugp-api/bag/v1/items",
+              "protocol": "https",
+              "host": [
+                "www",
+                "ae",
+                "com"
+              ],
+              "path": [
+                "ugp-api",
+                "bag",
+                "v1",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get item",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\r\nconst cart = response.data;\r\n\r\nconst expectedCartId =\r\n    pm.collectionVariables.get(\"cartId\");\r\n\r\nconst expectedSku =\r\n    pm.collectionVariables.get(\"skuId\");\r\n\r\n\r\nconst expectedItem = cart.items.find(\r\n    item => item.sku === expectedSku\r\n);\r\n\r\n\r\n// ---------- Save current itemId ----------\r\n\r\npm.test(\"Expected item exists in cart\", function () {\r\n    pm.expect(\r\n        expectedItem,\r\n        `Item with SKU ${expectedSku} was not found`\r\n    ).to.exist;\r\n});\r\n\r\nif (expectedItem) {\r\n    pm.collectionVariables.set(\r\n        \"itemId\",\r\n        expectedItem.itemId\r\n    );\r\n\r\n    console.log(\r\n        \"Saved itemId:\",\r\n        expectedItem.itemId\r\n    );\r\n}\r\n\r\n\r\n// ---------- Response validation ----------\r\n\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\n\r\npm.test(\"Response contains cart data\", function () {\r\n    pm.expect(cart).to.be.an(\"object\");\r\n    pm.expect(cart.items).to.be.an(\"array\");\r\n});\r\n\r\n\r\npm.test(\"Cart ID matches saved cartId\", function () {\r\n    pm.expect(cart.id).to.eql(expectedCartId);\r\n});\r\n\r\n\r\npm.test(\"Currency code is USD\", function () {\r\n    pm.expect(cart.currencyCode).to.eql(\"USD\");\r\n});\r\n\r\n\r\npm.test(\"Cart contains items\", function () {\r\n    pm.expect(cart.items)\r\n        .to.be.an(\"array\")\r\n        .that.is.not.empty;\r\n});\r\n\r\n\r\npm.test(\"Cart contains expected SKU\", function () {\r\n    pm.expect(expectedItem).to.exist;\r\n});\r\n\r\n\r\npm.test(\"Expected item is available\", function () {\r\n    pm.expect(expectedItem).to.exist;\r\n\r\n    if (expectedItem) {\r\n        pm.expect(expectedItem.available)\r\n            .to.eql(true);\r\n    }\r\n});\r\n\r\n\r\npm.test(\"Expected item has valid quantity\", function () {\r\n    pm.expect(expectedItem).to.exist;\r\n\r\n    if (expectedItem) {\r\n        pm.expect(expectedItem.quantity)\r\n            .to.be.above(0);\r\n    }\r\n});\r\n\r\n\r\npm.test(\"Cart itemCount matches total item quantity\", function () {\r\n\r\n    const totalQuantity = cart.items.reduce(\r\n        (sum, item) => sum + item.quantity,\r\n        0\r\n    );\r\n\r\n    pm.expect(cart.itemCount)\r\n        .to.eql(totalQuantity);\r\n});\r\n\r\n\r\npm.test(\"Response has no errors\", function () {\r\n    pm.expect(response.errors)\r\n        .to.be.an(\"array\")\r\n        .that.is.empty;\r\n});\r\n"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "aecountry",
+                "value": "US"
+              },
+              {
+                "key": "aelang",
+                "value": "en_US"
+              },
+              {
+                "key": "aesite",
+                "value": "AEO_US"
+              },
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "referer",
+                "value": "https://www.ae.com/us/en/c/men/mens?pagetype=clp"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://www.ae.com/ugp-api/bag/v1?couponErrorBehavior=cart&inventoryCheck=true",
+              "protocol": "https",
+              "host": [
+                "www",
+                "ae",
+                "com"
+              ],
+              "path": [
+                "ugp-api",
+                "bag",
+                "v1"
+              ],
+              "query": [
+                {
+                  "key": "couponErrorBehavior",
+                  "value": "cart"
+                },
+                {
+                  "key": "inventoryCheck",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update item in bag",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Status code is 202\", function () {\r\n    pm.response.to.have.status(202);\r\n});\r\n\r\nif (pm.response.code === 202) {\r\n    const response = pm.response.json();\r\n    const expectedCartId = pm.collectionVariables.get(\"cartId\");\r\n\r\n    pm.test(\"Response contains cartId\", function () {\r\n        pm.expect(response.cartId)\r\n            .to.be.a(\"string\")\r\n            .and.not.empty;\r\n    });\r\n\r\n    pm.test(\"Cart ID matches saved cartId\", function () {\r\n        pm.expect(response.cartId)\r\n            .to.eql(expectedCartId);\r\n    });\r\n\r\n    pm.test(\"Errors array is empty\", function () {\r\n        pm.expect(response.errors)\r\n            .to.be.an(\"array\")\r\n            .that.is.empty;\r\n    });\r\n\r\n    console.log(\"PATCH request accepted successfully\");\r\n    console.log(\"Updated quantity:\",\r\n        pm.collectionVariables.get(\"updatedQuantity\"));\r\n}\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "aecountry",
+                "value": "US"
+              },
+              {
+                "key": "aelang",
+                "value": "en_US"
+              },
+              {
+                "key": "aesite",
+                "value": "AEO_US"
+              },
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "origin",
+                "value": "https://www.ae.com"
+              },
+              {
+                "key": "referer",
+                "value": "https://www.ae.com/us/en/cart"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"items\": [\r\n    {\r\n      \"skuId\": \"{{skuId}}\",\r\n      \"quantity\": {{updatedQuantity}},\r\n      \"itemId\": \"{{itemId}}\"\r\n    }\r\n  ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://www.ae.com/ugp-api/bag/v1/items",
+              "protocol": "https",
+              "host": [
+                "www",
+                "ae",
+                "com"
+              ],
+              "path": [
+                "ugp-api",
+                "bag",
+                "v1",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify item updated",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nif (pm.response.code === 200) {\r\n    const response = pm.response.json();\r\n    const items = response.data?.items || [];\r\n\r\n    const expectedSku = pm.collectionVariables.get(\"skuId\");\r\n    const expectedQuantity = Number(\r\n        pm.collectionVariables.get(\"updatedQuantity\")\r\n    );\r\n    const expectedCartId = pm.collectionVariables.get(\"cartId\");\r\n\r\n    pm.test(\"Response contains cart data\", function () {\r\n        pm.expect(response.data).to.be.an(\"object\");\r\n        pm.expect(items).to.be.an(\"array\");\r\n    });\r\n\r\n    pm.test(\"Cart ID matches saved cartId\", function () {\r\n        pm.expect(response.data.id).to.eql(expectedCartId);\r\n    });\r\n\r\n    pm.test(\"Cart contains items\", function () {\r\n        pm.expect(items).to.be.an(\"array\").that.is.not.empty;\r\n    });\r\n\r\n    // В American Eagle поле товара называется sku\r\n    const item = items.find(\r\n        item => String(item.sku) === String(expectedSku)\r\n    );\r\n\r\n    pm.test(\"Updated item exists in cart\", function () {\r\n        pm.expect(item, \"Updated item not found\").to.exist;\r\n    });\r\n\r\n    if (item) {\r\n        pm.test(\"Updated quantity matches expected\", function () {\r\n            pm.expect(item.quantity).to.eql(expectedQuantity);\r\n        });\r\n\r\n        pm.test(\"Updated item is available\", function () {\r\n            pm.expect(item.available).to.eql(true);\r\n        });\r\n\r\n        pm.test(\"Updated item has valid itemId\", function () {\r\n            pm.expect(item.itemId).to.be.a(\"string\").and.not.empty;\r\n        });\r\n\r\n        // Сохраняем актуальный ID позиции для следующих операций\r\n        pm.collectionVariables.set(\"itemId\", item.itemId);\r\n\r\n        console.log(\"Verified SKU:\", item.sku);\r\n        console.log(\"Actual quantity:\", item.quantity);\r\n        console.log(\"Expected quantity:\", expectedQuantity);\r\n        console.log(\"Current itemId saved\");\r\n    }\r\n\r\n    pm.test(\"Response has no errors\", function () {\r\n        pm.expect(response.errors || []).to.be.an(\"array\").that.is.empty;\r\n    });\r\n}\r\n"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "aecountry",
+                "value": "US"
+              },
+              {
+                "key": "aelang",
+                "value": "en_US"
+              },
+              {
+                "key": "aesite",
+                "value": "AEO_US"
+              },
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "referer",
+                "value": "https://www.ae.com/us/en/c/men/mens?pagetype=clp"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://www.ae.com/ugp-api/bag/v1?couponErrorBehavior=cart&inventoryCheck=true",
+              "protocol": "https",
+              "host": [
+                "www",
+                "ae",
+                "com"
+              ],
+              "path": [
+                "ugp-api",
+                "bag",
+                "v1"
+              ],
+              "query": [
+                {
+                  "key": "couponErrorBehavior",
+                  "value": "cart"
+                },
+                {
+                  "key": "inventoryCheck",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add second item in bag",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Status code is 202\", function () {\r\n    pm.response.to.have.status(202);\r\n});\r\n\r\nif (pm.response.code === 202) {\r\n    const response = pm.response.json();\r\n\r\n    const expectedCartId =\r\n        pm.collectionVariables.get(\"cartId\");\r\n\r\n    const resolvedBody = pm.variables.replaceIn(\r\n        pm.request.body.raw\r\n    );\r\n\r\n    const requestBody = JSON.parse(resolvedBody);\r\n    const expectedSkuId2 = requestBody.items[0].skuId;\r\n\r\n    pm.test(\"Second SKU is valid\", function () {\r\n        pm.expect(expectedSkuId2)\r\n            .to.match(/^\\d+$/);\r\n    });\r\n\r\n    pm.test(\"Response contains cartId\", function () {\r\n        pm.expect(response.cartId)\r\n            .to.be.a(\"string\")\r\n            .and.not.empty;\r\n    });\r\n\r\n    pm.test(\"Cart ID matches saved cartId\", function () {\r\n        pm.expect(response.cartId)\r\n            .to.eql(expectedCartId);\r\n    });\r\n\r\n    pm.test(\"Response has no errors\", function () {\r\n        pm.expect(response.errors)\r\n            .to.be.an(\"array\")\r\n            .that.is.empty;\r\n    });\r\n\r\n    if (\r\n        /^\\d+$/.test(expectedSkuId2) &&\r\n        response.cartId === expectedCartId &&\r\n        Array.isArray(response.errors) &&\r\n        response.errors.length === 0\r\n    ) {\r\n        pm.collectionVariables.set(\r\n            \"expectedSkuId2\",\r\n            expectedSkuId2\r\n        );\r\n\r\n        console.log(\"Second item request accepted\");\r\n        console.log(\"Second SKU:\", expectedSkuId2);\r\n    }\r\n}\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "aecountry",
+                "value": "US"
+              },
+              {
+                "key": "aelang",
+                "value": "en_US"
+              },
+              {
+                "key": "aesite",
+                "value": "AEO_US"
+              },
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "referer",
+                "value": "https://www.ae.com/us/en/c/men/mens?pagetype=clp"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"items\": [\r\n        {\r\n            \"skuId\": \"{{skuId2}}\",\r\n            \"quantity\": 1\r\n        }\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://www.ae.com/ugp-api/bag/v1/items",
+              "protocol": "https",
+              "host": [
+                "www",
+                "ae",
+                "com"
+              ],
+              "path": [
+                "ugp-api",
+                "bag",
+                "v1",
+                "items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get items after adding second item",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nif (pm.response.code === 200) {\r\n    const response = pm.response.json();\r\n    const cart = response.data;\r\n\r\n    const expectedCartId = pm.collectionVariables.get(\"cartId\");\r\n    const expectedSku1 = pm.collectionVariables.get(\"skuId\");\r\n    const expectedSku2 = pm.collectionVariables.get(\"expectedSkuId2\");\r\n\r\n    const expectedQty1 = Number(\r\n        pm.collectionVariables.get(\"updatedQuantity\")\r\n    );\r\n\r\n    pm.test(\"Response contains cart data\", function () {\r\n        pm.expect(cart).to.be.an(\"object\");\r\n        pm.expect(cart.items).to.be.an(\"array\");\r\n    });\r\n\r\n    pm.test(\"Cart ID matches saved cartId\", function () {\r\n        pm.expect(cart.id).to.eql(expectedCartId);\r\n    });\r\n\r\n    pm.test(\"Cart contains two distinct items\", function () {\r\n        pm.expect(cart.items).to.have.lengthOf(2);\r\n    });\r\n\r\n    // Используем реальные поля American Eagle API\r\n    const firstItem = cart.items?.find(\r\n        item => String(item.sku) === String(expectedSku1)\r\n    );\r\n\r\n    const secondItem = cart.items?.find(\r\n        item => String(item.sku) === String(expectedSku2)\r\n    );\r\n\r\n    pm.test(\"First item exists in cart\", function () {\r\n        pm.expect(firstItem, \"First item not found\").to.exist;\r\n    });\r\n\r\n    pm.test(\"Second item exists in cart\", function () {\r\n        pm.expect(secondItem, \"Second item not found\").to.exist;\r\n    });\r\n\r\n    if (firstItem) {\r\n        pm.test(\"First item has expected quantity\", function () {\r\n            pm.expect(firstItem.quantity).to.eql(expectedQty1);\r\n        });\r\n    }\r\n\r\n    if (secondItem) {\r\n        pm.test(\"Second item has quantity 1\", function () {\r\n            pm.expect(secondItem.quantity).to.eql(1);\r\n        });\r\n\r\n        pm.test(\"Second item is available\", function () {\r\n            pm.expect(secondItem.available).to.eql(true);\r\n        });\r\n\r\n        pm.test(\"Second item has valid itemId\", function () {\r\n            pm.expect(secondItem.itemId)\r\n                .to.be.a(\"string\")\r\n                .and.not.empty;\r\n        });\r\n\r\n        // Сохраняем для последующего DELETE\r\n        pm.collectionVariables.set(\r\n            \"itemId2\",\r\n            secondItem.itemId\r\n        );\r\n    }\r\n\r\n    pm.test(\"Cart itemCount matches total quantity\", function () {\r\n        const totalQuantity = cart.items.reduce(\r\n            (sum, item) => sum + item.quantity,\r\n            0\r\n        );\r\n\r\n        pm.expect(cart.itemCount).to.eql(totalQuantity);\r\n    });\r\n\r\n    pm.test(\"Cart contains three units in total\", function () {\r\n        pm.expect(cart.itemCount).to.eql(3);\r\n    });\r\n\r\n    pm.test(\"Currency code is USD\", function () {\r\n        pm.expect(cart.currencyCode).to.eql(\"USD\");\r\n    });\r\n\r\n    pm.test(\"Response has no errors\", function () {\r\n        pm.expect(response.errors || [])\r\n            .to.be.an(\"array\")\r\n            .that.is.empty;\r\n    });\r\n\r\n    console.log(\"First SKU:\", expectedSku1);\r\n    console.log(\"Second SKU:\", expectedSku2);\r\n    console.log(\"Total items:\", cart.itemCount);\r\n}\r\n"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "aecountry",
+                "value": "US"
+              },
+              {
+                "key": "aelang",
+                "value": "en_US"
+              },
+              {
+                "key": "aesite",
+                "value": "AEO_US"
+              },
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "referer",
+                "value": "https://www.ae.com/us/en/c/men/mens?pagetype=clp"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://www.ae.com/ugp-api/bag/v1?couponErrorBehavior=cart&inventoryCheck=true",
+              "protocol": "https",
+              "host": [
+                "www",
+                "ae",
+                "com"
+              ],
+              "path": [
+                "ugp-api",
+                "bag",
+                "v1"
+              ],
+              "query": [
+                {
+                  "key": "couponErrorBehavior",
+                  "value": "cart"
+                },
+                {
+                  "key": "inventoryCheck",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete second item in bag",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Status code is 202\", function () {\r\n    pm.response.to.have.status(202);\r\n});\r\n\r\nif (pm.response.code === 202) {\r\n    const response = pm.response.json();\r\n\r\n    const expectedCartId =\r\n        pm.collectionVariables.get(\"cartId\");\r\n\r\n    const deletedItemId =\r\n        pm.collectionVariables.get(\"itemId2\");\r\n\r\n    pm.test(\"Response contains cartId\", function () {\r\n        pm.expect(response.cartId)\r\n            .to.be.a(\"string\")\r\n            .and.not.empty;\r\n    });\r\n\r\n    pm.test(\"Cart ID matches saved cartId\", function () {\r\n        pm.expect(response.cartId)\r\n            .to.eql(expectedCartId);\r\n    });\r\n\r\n    pm.test(\"Response has no errors\", function () {\r\n        pm.expect(response.errors)\r\n            .to.be.an(\"array\")\r\n            .that.is.empty;\r\n    });\r\n\r\n    pm.test(\"Deleted itemId is valid\", function () {\r\n        pm.expect(deletedItemId)\r\n            .to.be.a(\"string\")\r\n            .and.match(\r\n                /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i\r\n            );\r\n    });\r\n\r\n    console.log(\"DELETE request accepted\");\r\n    console.log(\"Deleted itemId:\", deletedItemId);\r\n}\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "aecountry",
+                "value": "US"
+              },
+              {
+                "key": "aelang",
+                "value": "en_US"
+              },
+              {
+                "key": "aesite",
+                "value": "AEO_US"
+              },
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "origin",
+                "value": "https://www.ae.com"
+              },
+              {
+                "key": "referer",
+                "value": "https://www.ae.com/us/en/cart"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://www.ae.com/ugp-api/bag/v1/items?itemIds={{itemId2}}",
+              "protocol": "https",
+              "host": [
+                "www",
+                "ae",
+                "com"
+              ],
+              "path": [
+                "ugp-api",
+                "bag",
+                "v1",
+                "items"
+              ],
+              "query": [
+                {
+                  "key": "itemIds",
+                  "value": "{{itemId2}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify second item deleted",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nif (pm.response.code === 200) {\r\n    const response = pm.response.json();\r\n    const cart = response.data;\r\n\r\n    const expectedCartId = pm.collectionVariables.get(\"cartId\");\r\n    const firstSku = pm.collectionVariables.get(\"skuId\");\r\n    const deletedSku = pm.collectionVariables.get(\"expectedSkuId2\");\r\n    const deletedItemId = pm.collectionVariables.get(\"itemId2\");\r\n    const expectedQuantity = Number(\r\n        pm.collectionVariables.get(\"updatedQuantity\")\r\n    );\r\n\r\n    pm.test(\"Response contains cart data\", function () {\r\n        pm.expect(cart).to.be.an(\"object\");\r\n        pm.expect(cart.items).to.be.an(\"array\");\r\n    });\r\n\r\n    pm.test(\"Cart ID matches saved cartId\", function () {\r\n        pm.expect(cart.id).to.eql(expectedCartId);\r\n    });\r\n\r\n    const firstItem = cart.items.find(\r\n        item => String(item.sku) === String(firstSku)\r\n    );\r\n\r\n    const secondItem = cart.items.find(\r\n        item => String(item.sku) === String(deletedSku)\r\n    );\r\n\r\n    pm.test(\"First item remains in cart\", function () {\r\n        pm.expect(firstItem, \"First item must remain\").to.exist;\r\n    });\r\n\r\n    pm.test(\"Deleted SKU is absent\", function () {\r\n        pm.expect(secondItem).to.be.undefined;\r\n    });\r\n\r\n    pm.test(\"Deleted itemId is absent\", function () {\r\n        const found = cart.items.some(\r\n            item => String(item.itemId) === String(deletedItemId)\r\n        );\r\n\r\n        pm.expect(found).to.eql(false);\r\n    });\r\n\r\n    pm.test(\"Cart contains exactly one item\", function () {\r\n        pm.expect(cart.items).to.have.lengthOf(1);\r\n    });\r\n\r\n    if (firstItem) {\r\n        pm.test(\"First item quantity remains unchanged\", function () {\r\n            pm.expect(firstItem.quantity).to.eql(expectedQuantity);\r\n        });\r\n    }\r\n\r\n    pm.test(\"Cart itemCount equals 2\", function () {\r\n        pm.expect(cart.itemCount).to.eql(2);\r\n    });\r\n\r\n    pm.test(\"Currency code is USD\", function () {\r\n        pm.expect(cart.currencyCode).to.eql(\"USD\");\r\n    });\r\n\r\n    pm.test(\"Response has no errors\", function () {\r\n        pm.expect(response.errors || [])\r\n            .to.be.an(\"array\")\r\n            .that.is.empty;\r\n    });\r\n\r\n    console.log(\"Second item deletion verified\");\r\n    console.log(\"Remaining SKU:\", firstItem?.sku);\r\n    console.log(\"Remaining quantity:\", firstItem?.quantity);\r\n}\r\n"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "aecountry",
+                "value": "US"
+              },
+              {
+                "key": "aelang",
+                "value": "en_US"
+              },
+              {
+                "key": "aesite",
+                "value": "AEO_US"
+              },
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "referer",
+                "value": "https://www.ae.com/us/en/c/men/mens?pagetype=clp"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://www.ae.com/ugp-api/bag/v1?couponErrorBehavior=cart&inventoryCheck=true",
+              "protocol": "https",
+              "host": [
+                "www",
+                "ae",
+                "com"
+              ],
+              "path": [
+                "ugp-api",
+                "bag",
+                "v1"
+              ],
+              "query": [
+                {
+                  "key": "couponErrorBehavior",
+                  "value": "cart"
+                },
+                {
+                  "key": "inventoryCheck",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete item in bag",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Status code is 202\", function () {\r\n    pm.response.to.have.status(202);\r\n});\r\n\r\nif (pm.response.code === 202) {\r\n    const response = pm.response.json();\r\n\r\n    const expectedCartId =\r\n        pm.collectionVariables.get(\"cartId\");\r\n\r\n    const deletedItemId =\r\n        pm.collectionVariables.get(\"itemId\");\r\n\r\n    pm.test(\"Response contains cartId\", function () {\r\n        pm.expect(response.cartId)\r\n            .to.be.a(\"string\")\r\n            .and.not.empty;\r\n    });\r\n\r\n    pm.test(\"Cart ID matches saved cartId\", function () {\r\n        pm.expect(response.cartId)\r\n            .to.eql(expectedCartId);\r\n    });\r\n\r\n    pm.test(\"Response has no errors\", function () {\r\n        pm.expect(response.errors)\r\n            .to.be.an(\"array\")\r\n            .that.is.empty;\r\n    });\r\n\r\n    pm.test(\"Deleted itemId is valid\", function () {\r\n        pm.expect(deletedItemId)\r\n            .to.be.a(\"string\")\r\n            .and.match(\r\n                /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i\r\n            );\r\n    });\r\n\r\n    console.log(\"DELETE request accepted\");\r\n    console.log(\"Deleted itemId:\", deletedItemId);\r\n}\r\n"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "aecountry",
+                "value": "US"
+              },
+              {
+                "key": "aelang",
+                "value": "en_US"
+              },
+              {
+                "key": "aesite",
+                "value": "AEO_US"
+              },
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "origin",
+                "value": "https://www.ae.com"
+              },
+              {
+                "key": "referer",
+                "value": "https://www.ae.com/us/en/cart"
+              }
+            ],
+            "url": {
+              "raw": "https://www.ae.com/ugp-api/bag/v1/items?itemIds={{itemId}}",
+              "protocol": "https",
+              "host": [
+                "www",
+                "ae",
+                "com"
+              ],
+              "path": [
+                "ugp-api",
+                "bag",
+                "v1",
+                "items"
+              ],
+              "query": [
+                {
+                  "key": "itemIds",
+                  "value": "{{itemId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify item deleted",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nif (pm.response.code === 200) {\r\n    const response = pm.response.json();\r\n    const cart = response.data;\r\n\r\n    const expectedCartId = pm.collectionVariables.get(\"cartId\");\r\n    const firstSku = pm.collectionVariables.get(\"skuId\");\r\n    const secondSku = pm.collectionVariables.get(\"expectedSkuId2\");\r\n\r\n    pm.test(\"Response contains cart data\", function () {\r\n        pm.expect(cart).to.be.an(\"object\");\r\n        pm.expect(cart.items).to.be.an(\"array\");\r\n    });\r\n\r\n    pm.test(\"Cart ID matches saved cartId\", function () {\r\n        pm.expect(cart.id).to.eql(expectedCartId);\r\n    });\r\n\r\n    pm.test(\"Cart items array is empty\", function () {\r\n        pm.expect(cart.items).to.be.an(\"array\").that.is.empty;\r\n    });\r\n\r\n    pm.test(\"Cart itemCount equals zero\", function () {\r\n        pm.expect(cart.itemCount).to.eql(0);\r\n    });\r\n\r\n    pm.test(\"First SKU is absent\", function () {\r\n        const found = cart.items.some(\r\n            item => String(item.sku) === String(firstSku)\r\n        );\r\n        pm.expect(found).to.eql(false);\r\n    });\r\n\r\n    pm.test(\"Second SKU is absent\", function () {\r\n        const found = cart.items.some(\r\n            item => String(item.sku) === String(secondSku)\r\n        );\r\n        pm.expect(found).to.eql(false);\r\n    });\r\n\r\n    pm.test(\"Currency code is valid when provided\", function () {\r\n    if (cart.currencyCode !== undefined && cart.currencyCode !== null) {\r\n        pm.expect(cart.currencyCode).to.eql(\"USD\");\r\n    } else {\r\n        console.log(\"Currency code is not provided for empty cart\");\r\n    }\r\n});\r\n\r\n    pm.test(\"Response has no errors\", function () {\r\n        pm.expect(response.errors || [])\r\n            .to.be.an(\"array\")\r\n            .that.is.empty;\r\n    });\r\n\r\n    console.log(\"Empty cart verified successfully\");\r\n    console.log(\"Cart itemCount:\", cart.itemCount);\r\n}\r\n"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "aecountry",
+                "value": "US"
+              },
+              {
+                "key": "aelang",
+                "value": "en_US"
+              },
+              {
+                "key": "aesite",
+                "value": "AEO_US"
+              },
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "referer",
+                "value": "https://www.ae.com/us/en/c/men/mens?pagetype=clp"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://www.ae.com/ugp-api/bag/v1?couponErrorBehavior=cart&inventoryCheck=true",
+              "protocol": "https",
+              "host": [
+                "www",
+                "ae",
+                "com"
+              ],
+              "path": [
+                "ugp-api",
+                "bag",
+                "v1"
+              ],
+              "query": [
+                {
+                  "key": "couponErrorBehavior",
+                  "value": "cart"
+                },
+                {
+                  "key": "inventoryCheck",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Utilities",
+      "item": [
+        {
+          "name": "Verify automatic token refresh",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"New Guest Token is saved\", function () {\r\n    const token = pm.collectionVariables.get(\"token\");\r\n    const expiresAt = Number(\r\n        pm.collectionVariables.get(\"token_expires_at\")\r\n    );\r\n\r\n    pm.expect(token).to.be.a(\"string\").and.not.empty;\r\n    pm.expect(expiresAt).to.be.above(Date.now());\r\n});"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "aecountry",
+                "value": "US"
+              },
+              {
+                "key": "aelang",
+                "value": "en_US"
+              },
+              {
+                "key": "aesite",
+                "value": "AEO_US"
+              },
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "referer",
+                "value": "https://www.ae.com/us/en/c/men/mens?pagetype=clp"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://www.ae.com/ugp-api/bag/v1?couponErrorBehavior=cart&inventoryCheck=true",
+              "protocol": "https",
+              "host": [
+                "www",
+                "ae",
+                "com"
+              ],
+              "path": [
+                "ugp-api",
+                "bag",
+                "v1"
+              ],
+              "query": [
+                {
+                  "key": "couponErrorBehavior",
+                  "value": "cart"
+                },
+                {
+                  "key": "inventoryCheck",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "exec": [
+          "\r\nconst tokenEndpoint = \"https://www.ae.com/ugp-api/auth/oauth/v5/token\";\r\n\r\n// Проверяем тип текущего запроса\r\nconst requestUrl = pm.request.url.toString();\r\n\r\nconst isTokenRequest = requestUrl.includes(\r\n    \"/auth/oauth/v5/token\"\r\n);\r\n\r\n// Негативные тесты, для которых не требуется обновление токена\r\nconst negativeRequests = [\r\n    \"Bag without Authorization\",\r\n    \"Bag with Invalid Token\"\r\n];\r\n\r\n// Пропускаем автоматическое обновление для указанных запросов\r\nconst skipAuthRefresh = negativeRequests.includes(\r\n    pm.info.requestName\r\n);\r\n\r\n// Не обновляем токен перед OAuth-запросом\r\n// и специально изолированными негативными тестами\r\nif (!isTokenRequest && !skipAuthRefresh) {\r\n\r\n    const token = pm.collectionVariables.get(\"token\");\r\n\r\n    const expiresAt = Number(\r\n        pm.collectionVariables.get(\"token_expires_at\") || 0\r\n    );\r\n\r\n    // Проверяем, существует ли действующий токен\r\n    const tokenIsValid =\r\n        typeof token === \"string\" &&\r\n        token.length > 0 &&\r\n        Number.isFinite(expiresAt) &&\r\n        Date.now() < expiresAt;\r\n\r\n    if (tokenIsValid) {\r\n\r\n        console.log(\"Using existing Guest Token\");\r\n\r\n    } else {\r\n\r\n        console.log(\r\n            \"Guest token is missing or expired. Refreshing...\"\r\n        );\r\n\r\n        \r\nconst basicAuth = await pm.vault.get(\r\n    \"ae_basic_auth\"\r\n);\r\n\r\nif (\r\n    typeof basicAuth !== \"string\" ||\r\n    !/^Basic\\s+[A-Za-z0-9+/=]+$/.test(basicAuth.trim())\r\n) {\r\n    throw new Error(\r\n        \"Basic Authentication credentials are missing or invalid in Postman Vault\"\r\n    );\r\n}\r\n\r\nconsole.log(\"Basic authorization format verified\");\r\n\r\n\r\n        // Запрашиваем новый Guest Token\r\n        const tokenResponse = await pm.sendRequest({\r\n            url: tokenEndpoint,\r\n            method: \"POST\",\r\n\r\n            header: {\r\n                \"Authorization\": basicAuth.trim(),\r\n                \"Content-Type\": \"application/x-www-form-urlencoded\",\r\n                \"Accept\": \"application/vnd.oracle.resource+json\",\r\n                \"aelang\": \"en_US\",\r\n                \"aesite\": \"AEO_US\",\r\n                \"aecountry\": \"US\",\r\n                \"Origin\": \"https://www.ae.com\",\r\n                \"Referer\": \"https://www.ae.com/us/en\"\r\n            },\r\n\r\n            body: {\r\n                mode: \"urlencoded\",\r\n                urlencoded: [\r\n                    {\r\n                        key: \"grant_type\",\r\n                        value: \"client_credentials\"\r\n                    }\r\n                ]\r\n            }\r\n        });\r\n\r\n        if (!tokenResponse || tokenResponse.code !== 200) {\r\n            throw new Error(\r\n                \"Failed to refresh Guest Token. HTTP status: \" +\r\n                (tokenResponse ? tokenResponse.code : \"No response\")\r\n            );\r\n        }\r\n\r\n        const data = tokenResponse.json();\r\n\r\n        if (\r\n            !data ||\r\n            typeof data.access_token !== \"string\" ||\r\n            data.access_token.length === 0\r\n        ) {\r\n            throw new Error(\r\n                \"Access token is missing in OAuth response\"\r\n            );\r\n        }\r\n\r\n        const expiresIn = Number(data.expires_in ?? 1800);\r\n\r\n        if (!Number.isFinite(expiresIn) || expiresIn <= 0) {\r\n            throw new Error(\"Invalid token expiration time\");\r\n        }\r\n\r\n        // Сохраняем новый токен\r\n        pm.collectionVariables.set(\r\n            \"token\",\r\n            data.access_token\r\n        );\r\n\r\n        // Время истечения с запасом 60 секунд\r\n        const expiresAtNew =\r\n            Date.now() +\r\n            Math.max(0, expiresIn - 60) * 1000;\r\n\r\n        pm.collectionVariables.set(\r\n            \"token_expires_at\",\r\n            String(expiresAtNew)\r\n        );\r\n\r\n        console.log(\r\n            \"Guest Token refreshed successfully\"\r\n        );\r\n    }\r\n} else if (skipAuthRefresh) {\r\n\r\n    console.log(\r\n        \"Automatic token refresh skipped for negative test\"\r\n    );\r\n}\r\n"
+        ],
+        "type": "text/javascript"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "token_expires_at",
+      "value": ""
+    },
+    {
+      "key": "skuId",
+      "value": "0045506755"
+    },
+    {
+      "key": "skuId2",
+      "value": "0045595014"
+    },
+    {
+      "key": "quantity",
+      "value": "1"
+    },
+    {
+      "key": "updatedQuantity",
+      "value": "2"
+    },
+    {
+      "key": "cartId",
+      "value": ""
+    },
+    {
+      "key": "itemId",
+      "value": ""
+    },
+    {
+      "key": "itemId2",
+      "value": ""
+    },
+    {
+      "key": "expectedSkuId2",
+      "value": ""
+    }
+  ]
+}

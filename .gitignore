@@ -1,0 +1,21 @@
+# Local secrets and Postman environments
+*.postman_environment.json
+*.postman_globals.json
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+Thumbs.db
+# JetBrains IDE
+.idea/
+*.iml
+
+# Python temporary files
+.venv/
+__pycache__/
+*.pyc
+
+# Test reports
+allure-results/
+allure-report/
